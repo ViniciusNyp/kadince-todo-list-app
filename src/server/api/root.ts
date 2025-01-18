@@ -3,7 +3,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { userRouter } from "./routers/auth";
 
 export const appRouter = createTRPCRouter({
-  post: postRouter,
+  todo: todoRouter,
   user: userRouter,
 });
 
