@@ -1,8 +1,6 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { db } from "~/server/db";
 import { api } from "../../trpc/server";
 
 
@@ -17,9 +15,7 @@ declare module "next-auth" {
     user: {
       id: string;
       username: string;
-      password: string;
-
-    } & DefaultSession["user"];
+    }
   }
 }
 
@@ -36,16 +32,29 @@ export const authConfig = {
         username: { label: "Username", type: "text", placeholder: "username" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-
+      async authorize(credentials, _req) {
         const user = await api.user.login(credentials);
 
-        if (user) {
-          console.log('user',user);
-          return user;
-        }
-        return null;
+        return user;
       },
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60,
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.user = user;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.user) {
+        session.user = token.user;
+      }
+      return session;
+    },
+  },
 } satisfies NextAuthConfig;

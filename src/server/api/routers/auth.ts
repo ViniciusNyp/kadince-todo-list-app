@@ -26,6 +26,7 @@ export const userRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.query.users.findFirst({
+        columns: {id: true, username: true},
         where: and(
           eq(users.username, input.username),
           eq(users.password, input.password),
