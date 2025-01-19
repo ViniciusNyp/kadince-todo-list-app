@@ -1,7 +1,11 @@
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { api } from "../../trpc/server";
+
+import { db } from "../db";
+import { eq, and } from "drizzle-orm";
+import { users } from "../db/schema";
+import { z } from "zod";
 
 
 /**
@@ -33,9 +37,19 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, _req) {
-        const user = await api.user.login(credentials);
+        const authSchema = z.object({ username: z.string().min(1), password: z.string().min(1) });
 
-        return user;
+        const input = authSchema.parse(credentials);
+
+        const user = await db.query.users.findFirst({
+          columns: { id: true, username: true },
+          where: and(
+            eq(users.username, input.username),
+            eq(users.password, input.password),
+          ),
+        });
+
+        return user ?? null;
       },
     }),
   ],

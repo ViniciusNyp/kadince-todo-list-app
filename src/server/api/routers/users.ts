@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+
 import { z } from "zod";
 
 import {
@@ -20,19 +20,4 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  login: publicProcedure
-    .input(
-      z.object({ username: z.string().min(1), password: z.string().min(1) }),
-    )
-    .query(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        columns: {id: true, username: true},
-        where: and(
-          eq(users.username, input.username),
-          eq(users.password, input.password),
-        ),
-      });
-
-      return user ?? null;
-    }),
 });
