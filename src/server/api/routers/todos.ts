@@ -11,7 +11,7 @@ export const todoRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ name: z.string().min(1), description: z.string().min(1).optional() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(todos).values({
+       await ctx.db.insert(todos).values({
         name: input.name,
         description: input.description,
         createdById: ctx.session.user.id,
@@ -27,11 +27,12 @@ export const todoRouter = createTRPCRouter({
     return result;
   }),
 
+  remove: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+    await ctx.db.delete(todos).where(eq(todos.id, input.id));
+  }
+  ),
+
   update: protectedProcedure.input(z.object({ id: z.number(), done: z.boolean().optional(), name: z.string().min(1).optional(), description: z.string().min(1).optional()  })).mutation(async ({ ctx, input }) => {
-    await ctx.db.update(todos).set({
-      done: input.done,
-      name: input.name,
-      description: input.description,
-    }).where(eq(todos.id, input.id));
+    await ctx.db.update(todos).set(input).where(eq(todos.id, input.id));
   } ),
 });
