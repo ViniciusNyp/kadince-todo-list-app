@@ -72,9 +72,7 @@ export const authConfig = {
     },
   },
   pages: {
-    signIn: "/login",
-    // signOut: "/logout",
-    newUser: "/register",
-    // error: "/login",
+    signIn: "/auth/login",
+    newUser: "/auth/register",
   }
 } satisfies NextAuthConfig;

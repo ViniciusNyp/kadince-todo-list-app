@@ -12,11 +12,13 @@ import { Input } from "~/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSession, signIn } from "next-auth/react";
 
 import { z } from "zod";
+import { Loader2 } from "lucide-react";
+import router from "next/router";
 
 const loginFormSchema = z.object({
   username: z
@@ -27,9 +29,8 @@ const loginFormSchema = z.object({
   password: z.string().trim().min(1, { message: "Password is required" }),
 });
 
-export default function LoginPage() {
-  const router = useRouter();
-  const session = useSession();
+export default function Login() {
+  const [loading, setLoading] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -39,19 +40,15 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof loginFormSchema>) =>
-    signIn("credentials", values);
-
-  useEffect(() => {
-    if (session?.data?.user?.id) {
-      void router.push("/todos");
-    }
-  }, [router, session?.data?.user?.id]);
+  const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+    setLoading(true);
+    return await signIn("credentials", values).finally(() => setLoading(false));
+  };
 
   return (
     <div className="w-full h-screen">
       <div className="flex flex-col items-center justify-center h-full py-12">
-        <div className="mx-auto grid w-[400px] gap-6">
+        <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Login</h1>
             <p className="text-muted-foreground">
@@ -91,14 +88,15 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" disabled={loading} className="w-full">
                 Login
+                {loading && <Loader2 className="animate-spin" />}
               </Button>
             </form>
           </Form>
           <div className="mt-4 text-sm text-center">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline">
+            <Link href="/auth/register" className="underline">
               Sign up
             </Link>
           </div>

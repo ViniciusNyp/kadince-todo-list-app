@@ -203,7 +203,7 @@ export function TodoList({ data }: { data: Todo[] }) {
           </Button>
         </TodoFormPopover>
       </div>
-      <div className="rounded-md border">
+      <div className="border rounded-md">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -253,7 +253,7 @@ export function TodoList({ data }: { data: Todo[] }) {
           </TableBody>
         </Table>
       </div>
-      {/* <div className="flex items-center justify-end space-x-2 py-4">
+      {/* <div className="flex items-center justify-end py-4 space-x-2">
         <div className="space-x-2">
           <Button
             variant="outline"

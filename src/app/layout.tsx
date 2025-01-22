@@ -7,7 +7,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  title: "Todo List",
+  title: "Todos",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
