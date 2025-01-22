@@ -1,5 +1,5 @@
 "use client";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 import * as React from "react";
 import {
@@ -14,13 +14,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -36,91 +35,130 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { AddTodoPopover } from "./add-todo-popover";
+import { TodoFormPopover } from "./todo-form-popover";
+import { type InferSelectModel } from "drizzle-orm";
+import { type todos } from "../../server/db/schema";
+import { api } from "../../trpc/react";
 
-export type Todo = {
-  id: number;
-  name: string | null;
-  // description: string | null;
-  done: boolean;
-  // createdById: string;
-  // createdAt: Date;
-  // updatedAt: Date | null;
-};
-
-export const columns: ColumnDef<Todo>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-
-  {
-    accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
-  },
-  // {
-  //   accessorKey: "status",
-  //   header: "Status",
-  //   cell: ({ row }) => (
-  //     <div className="capitalize">{row.getValue("status")}</div>
-  //   ),
-  // },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const todo = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-8 h-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Remove</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
+export type Todo = InferSelectModel<typeof todos>;
 
 export function TodoList({ data }: { data: Todo[] }) {
+  const utils = api.useUtils();
+
+  const updateTodoMutation = api.todo.update.useMutation({
+    onMutate: async (newEntry) => {
+      await utils.todo.getAll.cancel();
+      utils.todo.getAll.setData(undefined, (prevEntries) => {
+        if (prevEntries) {
+          return prevEntries.map((entry) =>
+            entry.id === newEntry.id ? { ...entry, ...newEntry } : entry,
+          );
+        }
+      });
+    },
+
+    onSettled: async () => {
+      await utils.todo.getAll.invalidate();
+    },
+  });
+
+  const markTodoAsReady = (id: number, done: boolean) => {
+    updateTodoMutation.mutate({ id, done });
+  };
+
+  const removeTodoMutation = api.todo.remove.useMutation({
+    onMutate: async (newEntry) => {
+      await utils.todo.getAll.cancel();
+      utils.todo.getAll.setData(undefined, (prevEntries) => {
+        if (prevEntries) {
+          return prevEntries.filter((entry) => entry.id !== newEntry.id);
+        }
+      });
+    },
+    onSettled: async () => {
+      await utils.todo.getAll.invalidate();
+    },
+  });
+
+  const columns: ColumnDef<Todo>[] = [
+    {
+      accessorKey: "done",
+      header: ({ column }) => {
+        return (
+          <Button
+            className="px-0"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <Checkbox
+            className="rounded-full"
+            checked={row.original.done}
+            onCheckedChange={(value) =>
+              markTodoAsReady(row.original.id, !!value)
+            }
+            aria-label="Done"
+          />
+        </div>
+      ),
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => {
+        return (
+          <>
+            <Button
+              variant="ghost"
+              className="px-0"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Name
+              <ArrowUpDown />
+            </Button>
+          </>
+        );
+      },
+      cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
+    },
+    // {
+    //   accessorKey: "status",
+    //   header: "Status",
+    //   cell: ({ row }) => (
+    //     <div className="capitalize">{row.getValue("status")}</div>
+    //   ),
+    // },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const todo = row.original;
+
+        return (
+          <div className="flex items-center justify-evenly">
+            <TodoFormPopover todo={todo}>
+              <Button variant={"ghost"}>
+                <Pencil />
+              </Button>
+            </TodoFormPopover>
+            <Button
+              onClick={() => removeTodoMutation.mutate({ id: todo.id })}
+              variant={"ghost"}
+            >
+              <Trash2 />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -157,15 +195,15 @@ export function TodoList({ data }: { data: Todo[] }) {
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="mr-6"
         />
-        <AddTodoPopover>
-          <Button variant={"outline"}>
+        <TodoFormPopover>
+          <Button className="rounded-xl">
             <Plus />
           </Button>
-        </AddTodoPopover>
+        </TodoFormPopover>
       </div>
-      <div className="border rounded-md">
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -193,7 +231,7 @@ export function TodoList({ data }: { data: Todo[] }) {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell className="" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -215,11 +253,7 @@ export function TodoList({ data }: { data: Todo[] }) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end py-4 space-x-2">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
+      {/* <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
           <Button
             variant="outline"
@@ -238,7 +272,7 @@ export function TodoList({ data }: { data: Todo[] }) {
             Next
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

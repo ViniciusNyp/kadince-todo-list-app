@@ -23,24 +23,27 @@ import { Textarea } from "../../components/ui/textarea";
 
 import { Button } from "../../components/ui/button";
 import { api } from "../../trpc/react";
+import { type Todo } from "./todo-list";
 
-const addTodoFormSchema = z.object({
+const todoFormSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
   description: z.string().trim().default(""),
 });
 
-export function AddTodoPopover({
+export function TodoFormPopover({
   children,
   actionOnSubmit,
+  todo,
 }: {
   children: ReactNode;
   actionOnSubmit?: () => void;
+  todo?: Todo;
 }): ReactElement {
-  const addTodoForm = useForm<z.infer<typeof addTodoFormSchema>>({
-    resolver: zodResolver(addTodoFormSchema),
+  const addTodoForm = useForm<z.infer<typeof todoFormSchema>>({
+    resolver: zodResolver(todoFormSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: todo?.name ?? "",
+      description: todo?.description ?? "",
     },
   });
 
@@ -50,10 +53,19 @@ export function AddTodoPopover({
     onMutate: async (newEntry) => {
       await utils.todo.getAll.cancel();
       utils.todo.getAll.setData(undefined, (prevEntries) => {
+        const defaultValues = {
+          id: Date.now(),
+          done: false,
+          createdById: "",
+          createdAt: new Date(),
+          updatedAt: null,
+          description: newEntry.description ?? null,
+        };
+
         if (prevEntries) {
-          return [newEntry, ...prevEntries];
+          return [{ ...defaultValues, ...newEntry }, ...prevEntries];
         } else {
-          return [newEntry];
+          return [{ ...defaultValues, ...newEntry }];
         }
       });
     },
@@ -62,10 +74,32 @@ export function AddTodoPopover({
     },
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof addTodoFormSchema>> = async (
-    values: z.infer<typeof addTodoFormSchema>,
+  const updateTodoMutation = api.todo.update.useMutation({
+    onMutate: async (newEntry) => {
+      await utils.todo.getAll.cancel();
+      utils.todo.getAll.setData(undefined, (prevEntries) => {
+        if (prevEntries) {
+          return prevEntries.map((entry) =>
+            entry.id === newEntry.id
+              ? { ...entry, ...newEntry }
+              : entry,
+          );
+        }
+      });
+    },
+    onSettled: async () => {
+      await utils.todo.getAll.invalidate();
+    },
+  });
+
+  const onSubmit: SubmitHandler<z.infer<typeof todoFormSchema>> = async (
+    values: z.infer<typeof todoFormSchema>,
   ) => {
-    createTodoMutation.mutate(values);
+    if (todo?.id) {
+      updateTodoMutation.mutate({ ...values, id: todo.id });
+    } else {
+      createTodoMutation.mutate(values);
+    }
     actionOnSubmit?.();
   };
 
@@ -108,7 +142,7 @@ export function AddTodoPopover({
               />
             </div>
             <Button type="submit" onClick={addTodoForm.handleSubmit(onSubmit)}>
-              Add
+              Save
             </Button>
           </form>
         </Form>
