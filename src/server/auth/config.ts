@@ -71,4 +71,10 @@ export const authConfig = {
       return session;
     },
   },
+  pages: {
+    signIn: "/login",
+    // signOut: "/logout",
+    newUser: "/register",
+    // error: "/login",
+  }
 } satisfies NextAuthConfig;
