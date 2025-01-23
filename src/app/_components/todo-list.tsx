@@ -1,5 +1,5 @@
 "use client";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Ellipsis } from "lucide-react";
 
 import * as React from "react";
 import {
@@ -125,15 +125,11 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
           </>
         );
       },
-      cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
+      cell: ({ row }) => (
+        <p className="max-w-full truncate">{row.getValue("name")}</p>
+      ),
     },
-    // {
-    //   accessorKey: "status",
-    //   header: "Status",
-    //   cell: ({ row }) => (
-    //     <div className="capitalize">{row.getValue("status")}</div>
-    //   ),
-    // },
+
     {
       id: "actions",
       enableHiding: false,
@@ -141,7 +137,12 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
         const todo = row.original;
 
         return (
-          <div className="flex items-center justify-evenly">
+          <div className="my-auto flex w-full items-center justify-evenly">
+            <TodoFormPopover readonly todo={todo}>
+              <Button variant={"ghost"}>
+                <Ellipsis />
+              </Button>
+            </TodoFormPopover>
             <TodoFormPopover todo={todo}>
               <Button variant={"ghost"}>
                 <Pencil />
@@ -187,7 +188,7 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-6xl">
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter by name..."
@@ -195,16 +196,16 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="mr-6"
+          className="mr-6 shadow-sm"
         />
         <TodoFormPopover>
-          <Button className="rounded-xl">
+          <Button className="rounded-xl shadow-sm">
             <Plus />
           </Button>
         </TodoFormPopover>
       </div>
-      <div className="border rounded-md">
-        <Table>
+      <div className="rounded-md border">
+        <Table className="shadow-sm">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -229,9 +230,10 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className=""
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell className="" key={cell.id}>
+                    <TableCell className="max-w-32" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -253,7 +255,7 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
           </TableBody>
         </Table>
       </div>
-      {/* <div className="flex items-center justify-end py-4 space-x-2">
+      <div className="flex items-center justify-end space-x-2 py-4">
         <div className="space-x-2">
           <Button
             variant="outline"
@@ -272,7 +274,7 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
             Next
           </Button>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }

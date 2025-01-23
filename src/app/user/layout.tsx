@@ -21,8 +21,10 @@ export default function RootLayout({
 
   return (
     <>
-      <div className="flex items-center justify-end p-4">
-        <UserNav />
+      <div className="fixed z-10 w-full border bg-white shadow-sm">
+        <div className="flex items-center justify-end p-4">
+          <UserNav />
+        </div>
       </div>
       {children}
     </>

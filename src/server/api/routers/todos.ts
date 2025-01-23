@@ -9,7 +9,7 @@ import { todos } from "~/server/db/schema";
 
 export const todoRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1), description: z.string().min(1).optional() }))
+    .input(z.object({ name: z.string().min(1), description: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
        await ctx.db.insert(todos).values({
         name: input.name,

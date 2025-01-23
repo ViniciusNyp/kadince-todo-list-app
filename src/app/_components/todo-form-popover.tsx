@@ -34,10 +34,12 @@ export function TodoFormPopover({
   children,
   actionOnSubmit,
   todo,
+  readonly = false,
 }: {
   children: ReactNode;
   actionOnSubmit?: () => void;
   todo?: Todo;
+  readonly?: boolean;
 }): ReactElement {
   const addTodoForm = useForm<z.infer<typeof todoFormSchema>>({
     resolver: zodResolver(todoFormSchema),
@@ -80,9 +82,7 @@ export function TodoFormPopover({
       utils.todo.getAll.setData(undefined, (prevEntries) => {
         if (prevEntries) {
           return prevEntries.map((entry) =>
-            entry.id === newEntry.id
-              ? { ...entry, ...newEntry }
-              : entry,
+            entry.id === newEntry.id ? { ...entry, ...newEntry } : entry,
           );
         }
       });
@@ -105,7 +105,9 @@ export function TodoFormPopover({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverTrigger className="cursor-pointer" asChild>
+        {children}
+      </PopoverTrigger>
       <PopoverContent className="">
         <Form {...addTodoForm}>
           <form onSubmit={addTodoForm.handleSubmit(onSubmit)}>
@@ -120,6 +122,7 @@ export function TodoFormPopover({
                       <Input
                         className="max-w-full"
                         placeholder="Name..."
+                        disabled={readonly}
                         {...field}
                       />
                     </FormControl>
@@ -134,16 +137,25 @@ export function TodoFormPopover({
                   <FormItem className="grid gap-2">
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Description here..." {...field} />
+                      <Textarea
+                        disabled={readonly}
+                        placeholder="Description here..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage className="text-sm" />
                   </FormItem>
                 )}
               />
             </div>
-            <Button type="submit" onClick={addTodoForm.handleSubmit(onSubmit)}>
-              Save
-            </Button>
+            {!readonly && (
+              <Button
+                type="submit"
+                onClick={addTodoForm.handleSubmit(onSubmit)}
+              >
+                Save
+              </Button>
+            )}
           </form>
         </Form>
       </PopoverContent>
