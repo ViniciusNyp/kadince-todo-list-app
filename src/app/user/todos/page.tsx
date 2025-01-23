@@ -8,7 +8,7 @@ export default function Todos() {
   return (
     <main className="flex flex-col items-center">
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        {data?.length && <TodoList data={data} />}
+        <TodoList data={data} />
       </div>
     </main>
   );

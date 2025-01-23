@@ -42,7 +42,7 @@ import { api } from "../../trpc/react";
 
 export type Todo = InferSelectModel<typeof todos>;
 
-export function TodoList({ data }: { data: Todo[] }) {
+export function TodoList({ data = [] }: { data?: Todo[] }) {
   const utils = api.useUtils();
 
   const updateTodoMutation = api.todo.update.useMutation({
