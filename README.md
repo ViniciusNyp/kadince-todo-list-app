@@ -1,29 +1,86 @@
-# Create T3 App
+# Kadince Todo List App
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This project is a Todo List application designed to help users manage their tasks efficiently.
 
-## What's next? How do I make an app with this?
+## Table of Contents
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Setup](#project-setup)
+- [Usage](#usage)
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- **User Authentication and Authorization**: Secure user login and registration using NextAuth.js.
+- **Task Management**: Create, view, edit, delete and sort tasks with ease.
+- **Responsive Design**: The application is fully responsive and accessible, ensuring a seamless experience on both desktop and mobile devices, thanks to shadcn/ui and Tailwind CSS.
+- **Real-time Updates**: Real-time task updates using tRPC and React Query, ensuring that all users see the latest changes instantly.
+- **Database Management**: Efficient database operations using Drizzle ORM, with support for migrations and schema management.
+- **User-friendly Interface**: Intuitive and clean user interface designed to enhance productivity.
 
-## Learn More
+## Tech Stack
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+This project uses cutting-edge technologies:
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+- **[Next.js](https://nextjs.org)**: A React framework for building server-side rendered applications. Chosen for its performance, scalability, and ease of use.
+- **[NextAuth.js](https://next-auth.js.org)**: Authentication for Next.js applications. Simplifies the implementation of secure user authentication and authorization.
+- **[shadcn/ui](https://ui.shadcn.com/)**: Beautifully designed components that you can copy and paste.
+- **[tRPC](https://trpc.io)**: End-to-end typesafe APIs made easy. Facilitates real-time communication and data synchronization.
+- **[Drizzle](https://orm.drizzle.team)**: A lightweight ORM for TypeScript. Ensures efficient database operations with minimal overhead.
+- **[React Query](https://react-query.tanstack.com)**: Data-fetching library for React. Used for managing server state and caching.
+- **[Tailwind CSS](https://tailwindcss.com)**: A utility-first CSS framework for rapid UI development. Enables rapid and consistent styling across the application.
+- **[TypeScript](https://www.typescriptlang.org)**: A strongly typed programming language that builds on JavaScript. Ensures type safety and improves code quality.
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### Why These Technologies?
 
-## How do I deploy this?
+- **Next.js**: Provides a robust framework for building scalable and performant web applications.
+- **NextAuth.js**: Simplifies the implementation of authentication and authorization.
+- **shadcn/ui**: Provides a set of accessible, reusable and customizable UI components, enhancing the development speed and consistency of the user interface.
+- **Drizzle**: Ensures efficient database operations with minimal overhead.
+- **tRPC**: Facilitates real-time communication and data synchronization.
+- **React Query**: Efficiently manages server state and caching, improving the performance and user experience.
+- **Tailwind CSS**: Enables rapid and consistent styling across the application.
+- **TypeScript**: Enhances code quality and maintainability with static typing.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Project Setup
+
+To set up the project locally, follow these steps:
+
+1. **Clone the repository:**
+
+   ```sh
+   git clone https://github.com/your-username/kadince-todo-list-app.git
+   cd kadince-todo-list-app
+   ```
+
+2. **Install dependencies:**
+
+   ```sh
+   pnpm install
+   ```
+
+3. **Set up environment variables:**
+
+   ```sh
+   cp .env.example .env
+   ```
+
+4. **Push database schema:**
+
+   ```sh
+   pnpm db:push
+   ```
+
+5. **Start the development server:**
+
+   ```sh
+   pnpm dev
+   ```
+
+## Usage
+
+Once the development server is running, you can access the application at `http://localhost:3000`. Here are some useful tips for using the application:
+
+- **Authentication**: Sign up or log in to start managing your tasks.
+- **Task Management**: Create, edit, and delete tasks. You can also categorize and prioritize tasks.
+- **Real-time Updates**: Any changes you make will be reflected in real-time across all connected clients.
