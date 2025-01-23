@@ -20,15 +20,28 @@ import { api } from "../../../trpc/react";
 import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 
-const registerFormSchema = z.object({
-  username: z.string().trim().min(1, { message: "Username is required" }),
-  password: z
-    .string()
-    .trim()
-    .min(1, { message: "Password is required" })
-    .min(8, { message: "Password need to be at least 8 characters" }),
-});
-
+const registerFormSchema = z
+  .object({
+    username: z.string().trim().min(1, { message: "Username is required" }),
+    password: z
+      .string()
+      .trim()
+      .min(1, { message: "Password is required" })
+      .min(8, { message: "Password need to be at least 8 characters" }),
+    confirmPassword: z
+      .string()
+      .trim()
+      .min(1, { message: "Confirm password is required" }),
+  })
+  .superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+      ctx.addIssue({
+        code: "custom",
+        message: "The passwords did not match",
+        path: ["confirmPassword"],
+      });
+    }
+  });
 export default function Register() {
   const registerMutation = api.user.register.useMutation({
     onSettled: () => {
@@ -41,6 +54,7 @@ export default function Register() {
     defaultValues: {
       username: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -83,6 +97,19 @@ export default function Register() {
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input placeholder="password" {...field} />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={registerForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel>Password confirmation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Retype your password..." {...field} />
                     </FormControl>
                     <FormMessage className="text-sm" />
                   </FormItem>
