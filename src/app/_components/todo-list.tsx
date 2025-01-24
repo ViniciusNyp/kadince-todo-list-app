@@ -1,5 +1,5 @@
 "use client";
-import { Plus, Pencil, Trash2, Ellipsis } from "lucide-react";
+import { Plus, Pencil, Trash2, Ellipsis, ChevronDown } from "lucide-react";
 
 import * as React from "react";
 import {
@@ -20,6 +20,7 @@ import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -196,8 +197,43 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="mr-6 shadow-sm"
+          className="mr-2 shadow-sm"
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="mr-2">
+              Status <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuCheckboxItem
+              checked={
+                (table.getColumn("done")?.getFilterValue() as boolean) ===
+                  true || undefined
+              }
+              onCheckedChange={(value) =>
+                table
+                  .getColumn("done")
+                  ?.setFilterValue(value === true ? true : undefined)
+              }
+            >
+              Complete
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={
+                (table.getColumn("done")?.getFilterValue() as boolean) ===
+                  false || undefined
+              }
+              onCheckedChange={(value) =>
+                table
+                  .getColumn("done")
+                  ?.setFilterValue(value === true ? false : undefined)
+              }
+            >
+              Pending
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <TodoFormPopover>
           <Button className="rounded-xl shadow-sm">
             <Plus />
