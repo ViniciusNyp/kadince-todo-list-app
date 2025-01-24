@@ -19,6 +19,7 @@ import { useSession, signIn } from "next-auth/react";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import router from "next/router";
+import { useToast } from "../../../hooks/use-toast";
 
 const loginFormSchema = z.object({
   username: z
@@ -32,6 +33,8 @@ const loginFormSchema = z.object({
 export default function Login() {
   const [loading, setLoading] = useState(false);
 
+  const { toast } = useToast();
+
   const loginForm = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -42,12 +45,20 @@ export default function Login() {
 
   const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
     setLoading(true);
-    return await signIn("credentials", values).finally(() => setLoading(false));
+    const result = await signIn("credentials", { ...values, redirect: false });
+
+    if (result?.error || !result?.ok) {
+      toast({ title: "Invalid credentials", variant: "destructive" });
+    } else {
+      toast({ title: "Login successful" });
+    }
+
+    setLoading(false);
   };
 
   return (
-    <div className="w-full h-screen">
-      <div className="flex flex-col items-center justify-center h-full py-12">
+    <div className="h-screen w-full">
+      <div className="flex h-full flex-col items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Login</h1>
@@ -94,7 +105,7 @@ export default function Login() {
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-sm text-center">
+          <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/auth/register" className="underline">
               Sign up

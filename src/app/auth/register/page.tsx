@@ -19,6 +19,7 @@ import Link from "next/link";
 import { api } from "../../../trpc/react";
 import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { useToast } from "../../../hooks/use-toast";
 
 const registerFormSchema = z
   .object({
@@ -43,9 +44,15 @@ const registerFormSchema = z
     }
   });
 export default function Register() {
+  const { toast } = useToast();
+
   const registerMutation = api.user.register.useMutation({
-    onSettled: () => {
+    onSuccess: () => {
+      toast({ title: "Registration successful" });
       void signIn();
+    },
+    onError: () => {
+      toast({ title: "Registration failed", variant: "destructive" });
     },
   });
 
