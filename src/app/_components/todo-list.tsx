@@ -64,7 +64,7 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
   });
 
   const markTodoAsReady = (id: number, done: boolean) => {
-    updateTodoMutation.mutate({ id, done });
+    updateTodoMutation.mutate({ id, done, completedAt: done ? new Date() : null });
   };
 
   const removeTodoMutation = api.todo.remove.useMutation({
@@ -130,7 +130,30 @@ export function TodoList({ data = [] }: { data?: Todo[] }) {
         <p className="max-w-full truncate">{row.getValue("name")}</p>
       ),
     },
+    {
+      accessorKey: "completedAt",
+      header: ({ column }) => {
+        return (
+          <Button
+            className="px-0"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Completed at
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) =>{
+        const completedAt = row.original.completedAt
+        const formateDate = `${completedAt?.toLocaleDateString() ?? "Not completed"}`;
 
+          return (
+        <div className="flex items-center">
+          {formateDate}
+        </div>)
+      },
+    },
     {
       id: "actions",
       enableHiding: false,

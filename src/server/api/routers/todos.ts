@@ -32,7 +32,7 @@ export const todoRouter = createTRPCRouter({
   }
   ),
 
-  update: protectedProcedure.input(z.object({ id: z.number(), done: z.boolean().optional(), name: z.string().min(1).optional(), description: z.string().min(1).optional()  })).mutation(async ({ ctx, input }) => {
+  update: protectedProcedure.input(z.object({ id: z.number(), done: z.boolean().optional(), name: z.string().min(1).optional(), description: z.string().min(1).optional(), completedAt: z.date().nullish()  })).mutation(async ({ ctx, input }) => {
     await ctx.db.update(todos).set(input).where(eq(todos.id, input.id));
   } ),
 });
