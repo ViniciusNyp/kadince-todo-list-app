@@ -8,6 +8,13 @@
       "when": 1737156802755,
       "tag": "0000_heavy_giant_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1739311096282,
+      "tag": "0001_whole_kronos",
+      "breakpoints": true
     }
   ]
 }
